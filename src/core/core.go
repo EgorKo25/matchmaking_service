@@ -1,0 +1,80 @@
+package core
+
+import (
+	"fmt"
+	"math"
+	"slices"
+	"time"
+)
+
+type Player struct {
+	Name    string
+	Latency float64
+	Skill   float64
+}
+
+type Group struct {
+	players []*Player
+
+	averagePermissibleLatency float64
+	averagePermissibleSkill   float64
+
+	ApproximatelyLatency float64
+	ApproximatelySkill   float64
+
+	createdAt time.Time
+}
+
+// AddPlayer добавляет пользователя в группу
+func (m *Group) AddPlayer(player *Player) {
+	m.players = append(m.players, player)
+	totalPlayers := float64(len(m.players))
+	m.averagePermissibleSkill = (m.averagePermissibleSkill*(totalPlayers-1) + player.Skill) / totalPlayers
+	m.averagePermissibleLatency = (m.averagePermissibleLatency*(totalPlayers-1) + player.Latency) / totalPlayers
+}
+
+type MatchmakingCore struct {
+	groups []*Group
+
+	GroupSize             int
+	AcceptableWaitingTime time.Duration
+	DeltaLatency          float64
+	DeltaSkill            float64
+}
+
+// FormatGroupInfo выводит информацию о собранной группе
+func (m *MatchmakingCore) FormatGroupInfo(group *Group) {
+	fmt.Printf("was create group: %v\nWith average latency: %0.2f\nWith average skill: %0.2f\n",
+		group.players, group.averagePermissibleLatency, group.averagePermissibleSkill)
+}
+
+// FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
+func (m *MatchmakingCore) FindGroup(player *Player) {
+	for index, group := range m.groups {
+		if time.Since(group.createdAt) > m.AcceptableWaitingTime {
+			group.ApproximatelyLatency += m.DeltaLatency
+			group.ApproximatelySkill += m.DeltaSkill
+		}
+		if checkApproximatelyEqual(group.averagePermissibleSkill, player.Skill, group.ApproximatelySkill) &&
+			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.ApproximatelyLatency) {
+			group.AddPlayer(player)
+			if len(group.players) == m.GroupSize {
+				m.groups = slices.Delete(m.groups, index, index)
+				m.FormatGroupInfo(group)
+			}
+			return
+		}
+	}
+
+	m.groups = append(m.groups, &Group{
+		players:                   []*Player{player},
+		averagePermissibleSkill:   player.Skill,
+		averagePermissibleLatency: player.Latency,
+		createdAt:                 time.Now(),
+	})
+	return
+}
+
+func checkApproximatelyEqual(first, second float64, difference float64) bool {
+	return math.Abs(first-second) <= difference
+}
