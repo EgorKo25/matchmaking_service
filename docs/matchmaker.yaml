@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Matchmaker API
+  description: Matchmaker API - это сервис, который занимается формированием групп для матча
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8000'
+components:
+  schemas:
+    UserList:
+      type: array
+      items:
+        type: object
+        properties:
+          allOf:
+            $ref: "#/components/schemas/User"
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        latency:
+          type: number
+        skill:
+          type: number
+    BaseErrorType:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "cannot apply request"
+
+paths:
+  /v1/users:
+    post:
+      tags:
+        - v1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: Пользователь добавлен в поиск группы
+        '400':
+          description: request содержит ошибку
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseErrorType"
+    get:
+      tags:
+        - v1
+      responses:
+        '200':
+          description: запрос упешен возвращается массив пользователей
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+
+
+
