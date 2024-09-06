@@ -14,7 +14,7 @@ type ILogger interface {
 
 type ICommand interface {
 	Name() string
-	Apply() (any, error)
+	Apply(ctx *gin.Context) (any, error)
 	Parse(ctx *gin.Context) error
 }
 
@@ -44,7 +44,7 @@ func (c *Manager) Register(command ICommand) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		response, err := command.Apply()
+		response, err := command.Apply(ctx)
 		if err != nil {
 			c.logger.Error("cannot apply request: %s, error: %s", command.Name(), err.Error())
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
