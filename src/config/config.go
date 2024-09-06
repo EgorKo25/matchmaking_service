@@ -9,7 +9,8 @@ import (
 
 const configPath = "./config/config.yaml"
 
-func NewAPIGWConfig() (*APIGWConfig, error) {
+// NewMSConfig конструктор конфигурации MS (matchmaking service)
+func NewMSConfig() (*APIGWConfig, error) {
 	cfg := &APIGWConfig{}
 	if err := cfg.loadConfig(); err != nil {
 		return nil, err
