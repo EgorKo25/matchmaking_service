@@ -10,15 +10,15 @@ import (
 const configPath = "./config/config.yaml"
 
 // NewMSConfig конструктор конфигурации MS (matchmaking service)
-func NewMSConfig() (*APIGWConfig, error) {
-	cfg := &APIGWConfig{}
+func NewMSConfig() (*MSConfig, error) {
+	cfg := &MSConfig{}
 	if err := cfg.loadConfig(); err != nil {
 		return nil, err
 	}
 	return cfg, nil
 }
 
-type APIGWConfig struct {
+type MSConfig struct {
 	*ServerConfig     `yaml:"server"`
 	*MatchmakerConfig `yaml:"matchmaker"`
 }
@@ -37,7 +37,7 @@ type MatchmakerConfig struct {
 	DeltaSkill            float64       `yaml:"delta-skill"`
 }
 
-func (a *APIGWConfig) loadConfig() error {
+func (a *MSConfig) loadConfig() error {
 	file, err := os.Open(configPath)
 	if err != nil {
 		return err
