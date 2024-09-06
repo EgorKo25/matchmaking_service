@@ -34,7 +34,7 @@ func (u *UserAdd) Parse(ctx *gin.Context) error {
 	err := validate.Struct(u)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			return fmt.Errorf("Field: %s, Error: %s\n", err.Field(), err.Tag())
+			return fmt.Errorf("field: %s, error: %s\n", err.Field(), err.Tag())
 		}
 		return err
 	}
