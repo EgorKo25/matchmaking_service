@@ -26,15 +26,15 @@ type Group struct {
 	ApproximatelyLatency float64
 	ApproximatelySkill   float64
 
-	lastUpdate time.Time
+	totalPlayers int32
 }
 
 // AddPlayer добавляет пользователя в группу
 func (m *Group) AddPlayer(player *Player) {
 	m.players = append(m.players, player)
-	totalPlayers := float64(len(m.players))
-	m.averagePermissibleSkill = (m.averagePermissibleSkill*(totalPlayers-1) + player.Skill) / totalPlayers
-	m.averagePermissibleLatency = (m.averagePermissibleLatency*(totalPlayers-1) + player.Latency) / totalPlayers
+	m.totalPlayers++
+	m.averagePermissibleSkill = m.averagePermissibleSkill * (float64(m.totalPlayers+1) + player.Skill) / float64(m.totalPlayers)
+	m.averagePermissibleLatency = m.averagePermissibleLatency * (float64(m.totalPlayers-1) + player.Latency) / float64(m.totalPlayers)
 }
 
 var matchmaker *MatchmakingCore
