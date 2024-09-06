@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"math"
 	"slices"
@@ -34,8 +35,8 @@ type Group struct {
 func (m *Group) AddPlayer(player *Player) {
 	m.players = append(m.players, player)
 	m.totalPlayers++
-	m.averagePermissibleSkill = m.averagePermissibleSkill * (float64(m.totalPlayers+1) + player.Skill) / float64(m.totalPlayers)
-	m.averagePermissibleLatency = m.averagePermissibleLatency * (float64(m.totalPlayers-1) + player.Latency) / float64(m.totalPlayers)
+	m.averagePermissibleSkill = (m.averagePermissibleSkill*float64(m.totalPlayers-1) + player.Skill) / float64(m.totalPlayers)
+	m.averagePermissibleLatency = (m.averagePermissibleLatency*float64(m.totalPlayers-1) + player.Latency) / float64(m.totalPlayers)
 }
 
 var matchmaker *MatchmakingCore
@@ -87,8 +88,23 @@ type MatchmakingCore struct {
 
 // formatGroupInfo выводит информацию о собранной группе
 func (m *MatchmakingCore) formatGroupInfo(group *Group) {
-	fmt.Printf("was create group: %v\nWith average latency: %0.2f\nWith average skill: %0.2f\n",
-		group.players, group.averagePermissibleLatency, group.averagePermissibleSkill)
+	fmt.Printf(
+		"Was create group:\nMin\\Max\\Avg latency: %0.2f\\%0.2f\\%0.2f\nMin\\Max\\Avg skill: %0.2f\\%0.2f\\%0.2f\n\n",
+		slices.MinFunc(group.players, func(a, b *Player) int {
+			return cmp.Compare(a.Latency, b.Latency)
+		}).Latency,
+		slices.MaxFunc(group.players, func(a, b *Player) int {
+			return cmp.Compare(a.Latency, b.Latency)
+		}).Latency,
+		group.averagePermissibleLatency,
+		slices.MinFunc(group.players, func(a, b *Player) int {
+			return cmp.Compare(a.Skill, b.Skill)
+		}).Skill,
+		slices.MaxFunc(group.players, func(a, b *Player) int {
+			return cmp.Compare(a.Skill, b.Skill)
+		}).Skill,
+		group.averagePermissibleSkill,
+	)
 }
 
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
@@ -101,7 +117,7 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 			group.AddPlayer(player)
 			if len(group.players) == m.GroupSize {
 				m.groups = slices.Delete(m.groups, index, index)
-				m.formatGroupInfo(group)
+				go m.formatGroupInfo(group)
 			}
 			return
 		}
@@ -113,6 +129,7 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 		averagePermissibleLatency: player.Latency,
 		differenceLatency:         m.DeltaLatency,
 		differenceSkill:           m.DeltaSkill,
+		totalPlayers:              1,
 	})
 }
 
