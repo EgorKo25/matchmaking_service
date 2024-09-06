@@ -27,6 +27,7 @@ type Group struct {
 	differenceSkill   float64
 
 	totalPlayers int32
+	updatedAt    time.Time
 }
 
 // AddPlayer добавляет пользователя в группу
@@ -50,8 +51,11 @@ func (m *MatchmakingCore) groupUpdate() {
 	defer m.mutex.Unlock()
 	for _ = range m.ticker.C {
 		for _, group := range m.groups {
-			group.differenceLatency += m.DeltaLatency
-			group.differenceSkill += m.DeltaSkill
+			if time.Since(group.updatedAt) >= m.AcceptableWaitingTime {
+				group.differenceLatency += m.DeltaLatency
+				group.differenceSkill += m.DeltaSkill
+				group.updatedAt = time.Now()
+			}
 		}
 	}
 }
