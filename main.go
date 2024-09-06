@@ -4,11 +4,11 @@ import (
 	"context"
 	l "log"
 
-	"matchamking/config"
-	"matchamking/core"
-	"matchamking/logger"
-	"matchamking/server"
-	"matchamking/server/command"
+	"matchamking/src/config"
+	"matchamking/src/core"
+	"matchamking/src/logger"
+	"matchamking/src/server"
+	"matchamking/src/server/command"
 )
 
 func main() {

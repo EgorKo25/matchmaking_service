@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"matchamking/config"
-	"matchamking/server/command"
+	"matchamking/src/config"
+	"matchamking/src/server/command"
 )
 
 type ILogger interface {
