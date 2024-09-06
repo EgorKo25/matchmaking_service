@@ -3,7 +3,9 @@ package database
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"matchamking/src/config"
 	"matchamking/src/core"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,19 +13,24 @@ import (
 	_ "matchamking/migrations"
 )
 
-func NewDB(ctx context.Context, connString string) (*DB, error) {
-	pool, err := pgxpool.New(ctx, connString)
+func NewDB(ctx context.Context, config *config.Database) (*Db, error) {
+	pool, err := pgxpool.New(ctx, fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=disable",
+		config.User,
+		config.Host,
+		config.Port,
+		config.DBName,
+	))
 	if err != nil {
 		return nil, err
 	}
-	return &DB{pool: pool}, MigrateDatabase(pool)
+	return &Db{pool: pool}, MigrateDatabase(pool)
 }
 
-type DB struct {
+type Db struct {
 	pool *pgxpool.Pool
 }
 
-func (d *DB) Insert(ctx context.Context, user *core.Player) error {
+func (d *Db) Insert(ctx context.Context, user *core.Player) error {
 	exec, err := d.pool.Exec(ctx, `INSERT INTO players
     (name, latency, skill, created_at) VALUES ($1, $2, $3, $4)`,
 		user.Name, user.Latency, user.Skill, user.CreatedAt)
@@ -36,7 +43,7 @@ func (d *DB) Insert(ctx context.Context, user *core.Player) error {
 	return err
 }
 
-func (d *DB) GetAllPlayers(ctx context.Context) ([]*core.Player, error) {
+func (d *Db) GetAllPlayers(ctx context.Context) ([]*core.Player, error) {
 	rows, err := d.pool.Query(ctx, `SELECT * FROM players`)
 	if err != nil {
 		return nil, err
