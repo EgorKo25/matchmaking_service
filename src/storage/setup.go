@@ -23,6 +23,10 @@ type IStorage interface {
 var Storage IStorage
 var once sync.Once
 
+func GetStorage() IStorage {
+	return Storage
+}
+
 func InitStorage(ctx context.Context, config *config.Storage) error {
 	var err error
 	var storage IStorage
