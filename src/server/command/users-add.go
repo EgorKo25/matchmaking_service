@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"matchamking/src/core"
+	"matchamking/src/storage"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -42,13 +43,14 @@ func (u *UserAdd) Parse(ctx *gin.Context) error {
 	return nil
 }
 
-func (u *UserAdd) Apply() (any, error) {
+func (u *UserAdd) Apply(ctx *gin.Context) (any, error) {
 	matchmaker := core.GetMatchmakingCore()
-	matchmaker.FindGroup(u.castToMatchmakingPlayer())
-	return nil, nil
+	matchmaker.FindGroup(u.castToPlayer())
+	store := storage.GetStorage()
+	return nil, store.Insert(ctx, u.castToPlayer())
 }
 
-func (u *UserAdd) castToMatchmakingPlayer() *core.Player {
+func (u *UserAdd) castToPlayer() *core.Player {
 	return &core.Player{
 		Name:      u.Name(),
 		Latency:   u.Latency,
