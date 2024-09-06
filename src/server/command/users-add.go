@@ -19,7 +19,7 @@ type UserAdd struct {
 }
 
 func (u *UserAdd) Name() string {
-	return "v1/user"
+	return "user"
 }
 func (u *UserAdd) Parse(ctx *gin.Context) error {
 	var buff []byte
