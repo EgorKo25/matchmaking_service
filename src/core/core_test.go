@@ -78,6 +78,7 @@ func BenchmarkFindGroupForGraph(b *testing.B) {
 			AcceptableWaitingTime: 5 * time.Minute,
 			DeltaLatency:          10,
 			DeltaSkill:            100,
+			ticker:                time.NewTicker(5 * time.Minute),
 		}
 
 		start := time.Now()
