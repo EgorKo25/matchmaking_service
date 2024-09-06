@@ -21,6 +21,17 @@ func NewMSConfig() (*MSConfig, error) {
 type MSConfig struct {
 	*ServerConfig     `yaml:"server"`
 	*MatchmakerConfig `yaml:"matchmaker"`
+	*Storage          `yaml:"Storage"`
+}
+type Storage struct {
+	*Database
+	StorageType int
+}
+type Database struct {
+	Host   string `yaml:"host"`
+	Port   string `yaml:"port"`
+	User   string `yaml:"user"`
+	DBName string `yaml:"db-name"`
 }
 
 type ServerConfig struct {
