@@ -26,7 +26,7 @@ func randomPlayer() *Player {
 
 // BenchmarkFindGroup тестирует производительность метода FindGroup
 func BenchmarkFindGroup(b *testing.B) {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Генерация 10000 случайных игроков
 	players := make([]*Player, 0, 10000)
@@ -53,7 +53,7 @@ func BenchmarkFindGroup(b *testing.B) {
 }
 
 func BenchmarkFindGroupForGraph(b *testing.B) {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Открываем файл для записи результатов
 	file, err := os.Create("benchmark_results.txt")
