@@ -23,8 +23,8 @@ type Group struct {
 	averagePermissibleLatency float64
 	averagePermissibleSkill   float64
 
-	ApproximatelyLatency float64
-	ApproximatelySkill   float64
+	differenceLatency float64
+	differenceSkill   float64
 
 	totalPlayers int32
 }
@@ -73,13 +73,8 @@ func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
 func (m *MatchmakingCore) FindGroup(player *Player) {
 	for index, group := range m.groups {
-		if time.Since(group.lastUpdate) > m.AcceptableWaitingTime {
-			group.ApproximatelyLatency += m.DeltaLatency
-			group.ApproximatelySkill += m.DeltaSkill
-			group.lastUpdate = time.Now()
-		}
-		if checkApproximatelyEqual(group.averagePermissibleSkill, player.Skill, group.ApproximatelySkill) &&
-			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.ApproximatelyLatency) {
+		if checkApproximatelyEqual(group.averagePermissibleSkill, player.Skill, group.differenceSkill) &&
+			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.differenceLatency) {
 			group.AddPlayer(player)
 			if len(group.players) == m.GroupSize {
 				m.groups = slices.Delete(m.groups, index, index)
@@ -93,11 +88,11 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 		players:                   []*Player{player},
 		averagePermissibleSkill:   player.Skill,
 		averagePermissibleLatency: player.Latency,
-		lastUpdate:                time.Now(),
+		differenceLatency:         m.DeltaLatency,
+		differenceSkill:           m.DeltaSkill,
 	})
-	return
 }
 
-func checkApproximatelyEqual(first, second float64, difference float64) bool {
+func checkApproximatelyEqual(first, second, difference float64) bool {
 	return math.Abs(first-second) <= difference
 }
