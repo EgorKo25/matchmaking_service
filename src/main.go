@@ -5,6 +5,7 @@ import (
 	l "log"
 
 	"matchamking/config"
+	"matchamking/core"
 	"matchamking/logger"
 	"matchamking/server"
 	"matchamking/server/command"
@@ -20,7 +21,7 @@ func main() {
 		log.Fatal("cannot load configuration with error: %s", err.Error())
 	}
 	manager := command.NewManager(log)
-
+	core.InitMatchmaker(cfg.MatchmakerConfig)
 	s := server.NewServer(cfg.ServerConfig, manager, log)
 	if err = s.Run(context.Background()); err != nil {
 		log.Fatal("%s", err.Error())
