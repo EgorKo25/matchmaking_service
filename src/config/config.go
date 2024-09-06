@@ -25,7 +25,7 @@ type MSConfig struct {
 }
 type Storage struct {
 	*Database
-	StorageType int
+	StorageType int `yaml:"storage-type"`
 }
 type Database struct {
 	Host   string `yaml:"host"`
