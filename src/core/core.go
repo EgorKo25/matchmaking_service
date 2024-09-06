@@ -8,9 +8,10 @@ import (
 )
 
 type Player struct {
-	Name    string
-	Latency float64
-	Skill   float64
+	Name      string
+	Latency   float64
+	Skill     float64
+	CreatedAt time.Time
 }
 
 type Group struct {
@@ -22,7 +23,7 @@ type Group struct {
 	ApproximatelyLatency float64
 	ApproximatelySkill   float64
 
-	createdAt time.Time
+	lastUpdate time.Time
 }
 
 // AddPlayer добавляет пользователя в группу
@@ -51,9 +52,10 @@ func (m *MatchmakingCore) FormatGroupInfo(group *Group) {
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
 func (m *MatchmakingCore) FindGroup(player *Player) {
 	for index, group := range m.groups {
-		if time.Since(group.createdAt) > m.AcceptableWaitingTime {
+		if time.Since(group.lastUpdate) > m.AcceptableWaitingTime {
 			group.ApproximatelyLatency += m.DeltaLatency
 			group.ApproximatelySkill += m.DeltaSkill
+			group.lastUpdate = time.Now()
 		}
 		if checkApproximatelyEqual(group.averagePermissibleSkill, player.Skill, group.ApproximatelySkill) &&
 			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.ApproximatelyLatency) {
@@ -70,7 +72,7 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 		players:                   []*Player{player},
 		averagePermissibleSkill:   player.Skill,
 		averagePermissibleLatency: player.Latency,
-		createdAt:                 time.Now(),
+		lastUpdate:                time.Now(),
 	})
 	return
 }
