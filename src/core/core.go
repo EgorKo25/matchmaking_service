@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"sync"
 	"time"
+
+	"matchamking/config"
 )
 
 type Player struct {
@@ -34,6 +37,24 @@ func (m *Group) AddPlayer(player *Player) {
 	m.averagePermissibleLatency = (m.averagePermissibleLatency*(totalPlayers-1) + player.Latency) / totalPlayers
 }
 
+var matchmaker *MatchmakingCore
+var once sync.Once
+
+func GetMatchmakingCore() *MatchmakingCore {
+	return matchmaker
+}
+
+func InitMatchmaker(matchmakerConfig *config.MatchmakerConfig) {
+	once.Do(func() {
+		matchmaker = &MatchmakingCore{
+			GroupSize:             matchmakerConfig.GroupSize,
+			AcceptableWaitingTime: matchmakerConfig.AcceptableWaitingTime,
+			DeltaSkill:            matchmakerConfig.DeltaSkill,
+			DeltaLatency:          matchmakerConfig.DeltaLatency,
+		}
+	})
+}
+
 type MatchmakingCore struct {
 	groups []*Group
 
@@ -43,8 +64,8 @@ type MatchmakingCore struct {
 	DeltaSkill            float64
 }
 
-// FormatGroupInfo выводит информацию о собранной группе
-func (m *MatchmakingCore) FormatGroupInfo(group *Group) {
+// formatGroupInfo выводит информацию о собранной группе
+func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 	fmt.Printf("was create group: %v\nWith average latency: %0.2f\nWith average skill: %0.2f\n",
 		group.players, group.averagePermissibleLatency, group.averagePermissibleSkill)
 }
@@ -62,7 +83,7 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 			group.AddPlayer(player)
 			if len(group.players) == m.GroupSize {
 				m.groups = slices.Delete(m.groups, index, index)
-				m.FormatGroupInfo(group)
+				m.formatGroupInfo(group)
 			}
 			return
 		}
