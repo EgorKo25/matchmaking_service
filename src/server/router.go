@@ -1,7 +1,7 @@
 package server
 
 import (
-	"matchamking/server/command"
+	"matchamking/src/server/command"
 
 	"github.com/gin-gonic/gin"
 )

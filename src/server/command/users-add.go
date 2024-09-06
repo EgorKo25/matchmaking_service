@@ -3,9 +3,10 @@ package command
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"time"
 
-	"matchamking/core"
+	"matchamking/src/core"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -19,19 +20,19 @@ type UserAdd struct {
 }
 
 func (u *UserAdd) Name() string {
-	return "user"
+	return "users"
 }
 func (u *UserAdd) Parse(ctx *gin.Context) error {
-	var buff []byte
-	if _, err := ctx.Request.Body.Read(buff); err != nil {
+	buff, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buff, u); err != nil {
+	if err = json.Unmarshal(buff, u); err != nil {
 		return err
 	}
 	u.CreatedAt = time.Now()
 	validate := validator.New()
-	err := validate.Struct(u)
+	err = validate.Struct(u)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			return fmt.Errorf("field: %s, error: %s\n", err.Field(), err.Tag())

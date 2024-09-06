@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"matchamking/config"
+	"matchamking/src/config"
 )
 
 type Player struct {

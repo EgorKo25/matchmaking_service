@@ -42,11 +42,13 @@ func (c *Manager) Register(command ICommand) gin.HandlerFunc {
 		if err := command.Parse(ctx); err != nil {
 			c.logger.Error("cannot parse request: %s, error: %s", command.Name(), err.Error())
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		response, err := command.Apply()
 		if err != nil {
 			c.logger.Error("cannot apply request: %s, error: %s", command.Name(), err.Error())
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		ctx.JSON(http.StatusOK, response)
 	}
