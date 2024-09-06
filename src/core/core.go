@@ -44,6 +44,18 @@ func GetMatchmakingCore() *MatchmakingCore {
 	return matchmaker
 }
 
+// groupUpdate обновляет группы по таймеру
+func (m *MatchmakingCore) groupUpdate() {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	for _ = range m.ticker.C {
+		for _, group := range m.groups {
+			group.differenceLatency += m.DeltaLatency
+			group.differenceSkill += m.DeltaSkill
+		}
+	}
+}
+
 func InitMatchmaker(matchmakerConfig *config.MatchmakerConfig) {
 	once.Do(func() {
 		matchmaker = &MatchmakingCore{
@@ -51,7 +63,9 @@ func InitMatchmaker(matchmakerConfig *config.MatchmakerConfig) {
 			AcceptableWaitingTime: matchmakerConfig.AcceptableWaitingTime,
 			DeltaSkill:            matchmakerConfig.DeltaSkill,
 			DeltaLatency:          matchmakerConfig.DeltaLatency,
+			ticker:                time.NewTicker(matchmakerConfig.AcceptableWaitingTime),
 		}
+		go matchmaker.groupUpdate()
 	})
 }
 
@@ -62,6 +76,9 @@ type MatchmakingCore struct {
 	AcceptableWaitingTime time.Duration
 	DeltaLatency          float64
 	DeltaSkill            float64
+
+	ticker *time.Ticker
+	mutex  sync.Mutex
 }
 
 // formatGroupInfo выводит информацию о собранной группе
@@ -72,6 +89,8 @@ func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
 func (m *MatchmakingCore) FindGroup(player *Player) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	for index, group := range m.groups {
 		if checkApproximatelyEqual(group.averagePermissibleSkill, player.Skill, group.differenceSkill) &&
 			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.differenceLatency) {
