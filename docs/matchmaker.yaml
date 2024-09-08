@@ -8,11 +8,11 @@ servers:
 components:
   schemas:
     UserList:
-      type: array
-      items:
-        type: object
-        properties:
-          allOf:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
             $ref: "#/components/schemas/User"
     User:
       type: object
@@ -50,6 +50,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BaseErrorType"
+  /v1/users/list:
     get:
       tags:
         - v1
