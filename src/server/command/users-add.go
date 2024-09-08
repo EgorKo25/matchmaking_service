@@ -45,7 +45,7 @@ func (u *UserAdd) Parse(ctx *gin.Context) error {
 
 func (u *UserAdd) Apply(ctx *gin.Context) (any, error) {
 	matchmaker := core.GetMatchmakingCore()
-	matchmaker.FindGroup(u.castToPlayer())
+	go matchmaker.FindGroup(u.castToPlayer())
 	store := storage.GetStorage()
 	return nil, store.Insert(ctx, u.castToPlayer())
 }
