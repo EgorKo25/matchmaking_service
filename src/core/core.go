@@ -50,7 +50,7 @@ func GetMatchmakingCore() *MatchmakingCore {
 func (m *MatchmakingCore) groupUpdate() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	for _ = range m.ticker.C {
+	for range m.ticker.C {
 		for _, group := range m.groups {
 			if time.Since(group.updatedAt) >= m.AcceptableWaitingTime {
 				group.differenceLatency += m.DeltaLatency
