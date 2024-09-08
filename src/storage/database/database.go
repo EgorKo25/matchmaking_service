@@ -14,7 +14,7 @@ import (
 )
 
 func NewDB(ctx context.Context, config *config.Database) (*Db, error) {
-	pool, err := pgxpool.New(ctx, fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=disable",
+	pool, err := pgxpool.New(ctx, fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable",
 		config.User,
 		config.Host,
 		config.Port,
