@@ -8,7 +8,7 @@ import (
 )
 
 type UsersList struct {
-	users []*Player
+	Users []*Player `json:"players"`
 }
 
 type Player struct {
@@ -31,12 +31,12 @@ func (u *UsersList) Apply(ctx *gin.Context) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	u.users = custToListPlayers(players)
+	u.Users = custToListPlayers(players)
 	return u, err
 }
 
 func custToListPlayers(players []*core.Player) []*Player {
-	result := make([]*Player, len(players))
+	result := make([]*Player, 0)
 	for _, v := range players {
 		result = append(result, &Player{
 			PlayerName: v.Name,
