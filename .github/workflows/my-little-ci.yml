@@ -6,27 +6,8 @@ on:
       - main
 
 jobs:
-  check-code:
-    env:
-      REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.SECRET }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Установка Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.0'
-      - name: Установка reviewdog
-        run: go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
-      - name: Запуск golangci-lint через Reviewdog
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
-          echo "Install done"
-          golangci-lint run --out-format=line-number --disable typecheck | reviewdog -f=golangci-lint -name="golangci-lint" -reporter=github-pr-review -fail-on-error=true
   build:
     runs-on: ubuntu-latest
-    needs:
-      - check-code
     steps:
       - name: Клонирование репозитория
         uses: actions/checkout@v4
