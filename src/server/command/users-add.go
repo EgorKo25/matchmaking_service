@@ -52,7 +52,7 @@ func (u *UserAdd) Apply(ctx *gin.Context) (any, error) {
 
 func (u *UserAdd) castToPlayer() *core.Player {
 	return &core.Player{
-		Name:      u.Name(),
+		Name:      u.PlayerName,
 		Latency:   u.Latency,
 		Skill:     u.Skill,
 		CreatedAt: u.CreatedAt,
