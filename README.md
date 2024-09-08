@@ -1,6 +1,6 @@
 # Сервис подбора матчей (Matchmaking Service)
 
-## Что делает
+## Что делает ? 
 Сервис запускается и динамически собирает игроков в комнаты по 3-м параметрам
  + Skill - уровень игры игрока 
  + Latency - задержка игрока 
@@ -53,3 +53,19 @@ go build -o mm-service .
 ```shell
 go run . 
 ```
+
+## Что еще есть ? 
+### Benchmarks
+
+В директории [**./src/core**](https://github.com/EgorKo25/matchmaking_service/blob/main/src/core/) есть файл [**benchmark.py**](https://github.com/EgorKo25/matchmaking_service/blob/main/src/core/benchmark.py) он отрисовывает график по файлу, который генерируется в результате  
+запуска функции **BenchmarkFindGroupForGraph** в файле [**./src/core/core_test.go**](https://github.com/EgorKo25/matchmaking_service/blob/main/src/core/core_test.go)
+
+Функция **BenchmarkFindGroupForGraph** проводит исследование изменения скорости работы поиска группы для пользователя на 1, 10, 100, 1000, 10000, 100000, 1000000 пробах.
+Согласно графику время растет линейно - **O(n)**.
+### Тесты 
+
+Также реализованы unit-тесты покрывающие основной функционал, для запуска всех тестов достаточно ввести команду:
+```shell
+go test ./...
+```
+в корне проекта 
