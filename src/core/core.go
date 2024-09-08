@@ -116,7 +116,7 @@ func (m *MatchmakingCore) FindGroup(player *Player) {
 			checkApproximatelyEqual(group.averagePermissibleLatency, player.Latency, group.differenceLatency) {
 			group.AddPlayer(player)
 			if len(group.players) == m.GroupSize {
-				m.groups = slices.Delete(m.groups, index, index)
+				m.groups = append(m.groups[:index], m.groups[index+1:]...)
 				go m.formatGroupInfo(group)
 			}
 			return
