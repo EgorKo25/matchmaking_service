@@ -27,13 +27,26 @@ func TestInitMatchmaker(t *testing.T) {
 }
 
 func setupTestMatchmakingCore() *MatchmakingCore {
-	InitMatchmaker(
-		&config.MatchmakerConfig{AcceptableWaitingTime: 15, DeltaSkill: 10, DeltaLatency: 50, GroupSize: 3})
-	return GetMatchmakingCore()
+	mmCore := GetMatchmakingCore()
+	if mmCore == nil {
+		InitMatchmaker(
+			&config.MatchmakerConfig{AcceptableWaitingTime: 5 * time.Minute, DeltaSkill: 10, DeltaLatency: 50, GroupSize: 3})
+	}
+	mmCore.GroupSize = 3
+	mmCore.AcceptableWaitingTime = 5 * time.Minute
+	mmCore.DeltaLatency = 50
+	mmCore.DeltaSkill = 10
+	return mmCore
+}
+func tearDownMatchmakingCore() {
+	core := GetMatchmakingCore()
+	core.groups = nil
+	matchmaker.ticker.Stop()
 }
 
 func TestFindGroup_CreateNewGroup(t *testing.T) {
 	mmCore := setupTestMatchmakingCore()
+	defer tearDownMatchmakingCore()
 	player := randomPlayer()
 
 	mmCore.FindGroup(player)
@@ -44,6 +57,7 @@ func TestFindGroup_CreateNewGroup(t *testing.T) {
 
 func TestFindGroup_BoundaryConditions(t *testing.T) {
 	mmCore := setupTestMatchmakingCore()
+	defer tearDownMatchmakingCore()
 
 	group := &Group{
 		players:                   []*Player{},
@@ -57,8 +71,8 @@ func TestFindGroup_BoundaryConditions(t *testing.T) {
 
 	player := &Player{
 		Name:    "Player4",
-		Skill:   60.0,  // Навык ровно на границе
-		Latency: 150.0, // Латентность ровно на границе
+		Skill:   60.0,
+		Latency: 150.0,
 	}
 
 	mmCore.FindGroup(player)
@@ -69,6 +83,7 @@ func TestFindGroup_BoundaryConditions(t *testing.T) {
 
 func TestFindGroup_FillGroupAndRemove(t *testing.T) {
 	mmCore := setupTestMatchmakingCore()
+	defer tearDownMatchmakingCore()
 
 	group := &Group{
 		players:                   []*Player{},
@@ -132,18 +147,15 @@ func BenchmarkFindGroup(b *testing.B) {
 func BenchmarkFindGroupForGraph(b *testing.B) {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Открываем файл для записи результатов
 	file, err := os.Create("benchmark_results.txt")
 	if err != nil {
 		b.Fatalf("Ошибка при создании файла: %v", err)
 	}
 	defer file.Close()
 
-	// Определяем размеры очередей для тестирования
 	playerSizes := []int{1, 10, 100, 1000, 10000, 100000, 1000000}
 
 	for _, size := range playerSizes {
-		// Генерация игроков для каждого размера
 		players := make([]*Player, 0, size)
 		for i := 0; i < size; i++ {
 			players = append(players, randomPlayer())
