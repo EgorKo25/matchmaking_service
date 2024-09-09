@@ -48,9 +48,8 @@ func GetMatchmakingCore() *MatchmakingCore {
 
 // groupUpdate обновляет группы по таймеру
 func (m *MatchmakingCore) groupUpdate() {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
 	for range m.ticker.C {
+		m.Mutex.Lock()
 		for _, group := range m.groups {
 			if time.Since(group.updatedAt) >= m.AcceptableWaitingTime {
 				group.differenceLatency += m.DeltaLatency
@@ -58,6 +57,7 @@ func (m *MatchmakingCore) groupUpdate() {
 				group.updatedAt = time.Now()
 			}
 		}
+		m.Mutex.Unlock()
 	}
 }
 
@@ -89,7 +89,7 @@ type MatchmakingCore struct {
 // formatGroupInfo выводит информацию о собранной группе
 func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 	fmt.Printf(
-		"Was create group:\nMin\\Max\\Avg latency: %0.2f\\%0.2f\\%0.2f\nMin\\Max\\Avg skill: %0.2f\\%0.2f\\%0.2f\n\n",
+		"Was create group:\nMin\\Max\\Avg latency: %0.2f\\%0.2f\\%0.2f\nMin\\Max\\Avg skill: %0.2f\\%0.2f\\%0.2f\nPlayers:\n",
 		slices.MinFunc(group.players, func(a, b *Player) int {
 			return cmp.Compare(a.Latency, b.Latency)
 		}).Latency,
@@ -105,6 +105,10 @@ func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 		}).Skill,
 		group.averagePermissibleSkill,
 	)
+
+	for i, p := range group.players {
+		fmt.Printf("Player: %d, Name: %s", i+1, p.Name)
+	}
 }
 
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
