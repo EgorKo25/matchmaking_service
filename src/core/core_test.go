@@ -31,6 +31,7 @@ func setupTestMatchmakingCore() *MatchmakingCore {
 	if mmCore == nil {
 		InitMatchmaker(
 			&config.MatchmakerConfig{AcceptableWaitingTime: 5 * time.Minute, DeltaSkill: 10, DeltaLatency: 50, GroupSize: 3})
+		mmCore = GetMatchmakingCore()
 	}
 	mmCore.GroupSize = 3
 	mmCore.AcceptableWaitingTime = 5 * time.Minute
