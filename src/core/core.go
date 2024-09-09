@@ -19,6 +19,8 @@ type Player struct {
 }
 
 type Group struct {
+	ID int32
+
 	players []*Player
 
 	averagePermissibleLatency float64
@@ -89,7 +91,8 @@ type MatchmakingCore struct {
 // formatGroupInfo выводит информацию о собранной группе
 func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 	fmt.Printf(
-		"Was create group:\nMin\\Max\\Avg latency: %0.2f\\%0.2f\\%0.2f\nMin\\Max\\Avg skill: %0.2f\\%0.2f\\%0.2f\nPlayers:\n",
+		"Was create group with ID:%d:\nMin\\Max\\Avg latency: %0.2f\\%0.2f\\%0.2f\nMin\\Max\\Avg skill: %0.2f\\%0.2f\\%0.2f\nPlayers:\n",
+		group.ID,
 		slices.MinFunc(group.players, func(a, b *Player) int {
 			return cmp.Compare(a.Latency, b.Latency)
 		}).Latency,
@@ -107,8 +110,9 @@ func (m *MatchmakingCore) formatGroupInfo(group *Group) {
 	)
 
 	for i, p := range group.players {
-		fmt.Printf("Player: %d, Name: %s", i+1, p.Name)
+		fmt.Printf("Player: %d, Name: %s\n", i+1, p.Name)
 	}
+	fmt.Println()
 }
 
 // FindGroup добавляет игрока в наиболее подходящую группу или создает для него новую
