@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"matchamking/src/config"
 	"matchamking/src/core"
 	"matchamking/src/storage"
 
@@ -29,7 +31,22 @@ func (ms *MockStorage) GetAllPlayers(_ context.Context) ([]*core.Player, error) 
 	return ms.players, nil
 }
 
+func setupTestMatchmakingCore() *core.MatchmakingCore {
+	mmCore := core.GetMatchmakingCore()
+	if mmCore == nil {
+		core.InitMatchmaker(
+			&config.MatchmakerConfig{AcceptableWaitingTime: 5 * time.Minute, DeltaSkill: 10, DeltaLatency: 50, GroupSize: 3})
+		mmCore = core.GetMatchmakingCore()
+	}
+	mmCore.GroupSize = 3
+	mmCore.AcceptableWaitingTime = 5 * time.Minute
+	mmCore.DeltaLatency = 50
+	mmCore.DeltaSkill = 10
+	return mmCore
+}
+
 func TestUserAdd_ValidRequest(t *testing.T) {
+	setupTestMatchmakingCore()
 	gin.SetMode(gin.TestMode)
 	mockStorage := &MockStorage{}
 	storage.Storage = mockStorage

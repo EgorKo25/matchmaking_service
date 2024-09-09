@@ -41,7 +41,9 @@ func setupTestMatchmakingCore() *MatchmakingCore {
 }
 func tearDownMatchmakingCore() {
 	core := GetMatchmakingCore()
+	core.Mutex.Lock()
 	core.groups = nil
+	core.Mutex.Unlock()
 	matchmaker.ticker.Stop()
 }
 
@@ -68,8 +70,9 @@ func TestFindGroup_BoundaryConditions(t *testing.T) {
 		differenceLatency:         50.0,
 		totalPlayers:              0,
 	}
+	mmCore.Mutex.Lock()
 	mmCore.groups = append(mmCore.groups, group)
-
+	mmCore.Mutex.Unlock()
 	player := &Player{
 		Name:    "Player4",
 		Skill:   60.0,
@@ -94,7 +97,9 @@ func TestFindGroup_FillGroupAndRemove(t *testing.T) {
 		differenceLatency:         50.0,
 		totalPlayers:              0,
 	}
+	mmCore.Mutex.Lock()
 	mmCore.groups = append(mmCore.groups, group)
+	mmCore.Mutex.Unlock()
 
 	players := [3]*Player{
 		{Name: "Player1", Skill: 55.0, Latency: 110.0},
