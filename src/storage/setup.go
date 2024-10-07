@@ -20,27 +20,27 @@ type IStorage interface {
 	GetAllPlayers(ctx context.Context) ([]*core.Player, error)
 }
 
-var Storage IStorage
+var storage IStorage
 var once sync.Once
 
 func GetStorage() IStorage {
-	return Storage
+	return storage
 }
 
 func InitStorage(ctx context.Context, config *config.Storage) error {
 	var err error
-	var storage IStorage
+	var s IStorage
 	switch config.StorageType {
 	case LocalStorage:
-		storage = local.NewStorage()
+		s = local.NewStorage()
 	case DatabaseStorage:
-		storage, err = database.NewDB(ctx, config.Database)
+		s, err = database.NewDB(ctx, config.Database)
 	}
 	if err != nil {
 		return err
 	}
 	once.Do(func() {
-		Storage = storage
+		storage = s
 	})
 	return nil
 }
